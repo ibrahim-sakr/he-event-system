@@ -80,3 +80,9 @@ the main object that contains all events with listeners
 `Dispatcher.events;`
 
 I'm Welcoming with any comment or advise
+
+### Todo List
+
+1. separate the Listeners Object in it's Module
+2. add Support for Logging and Logging Level (errors, warnings, successes)
+3. reStructure some code in DispatcherCore
