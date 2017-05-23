@@ -1,0 +1,11 @@
+{
+  "name": "he-event-system",
+  "version": "1.1.0",
+  "description": "registre and fire events with promises returns",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ibrahim Saqr <ebrahimes@gmail.com>",
+  "license": "MIT"
+}
