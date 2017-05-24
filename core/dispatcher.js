@@ -26,7 +26,7 @@ Dispatcher.prototype.fire = function(eventName, ...args){
                         var listenerPromise = self.fireListener(eventName, self.events[eventName][i], args);
                         listenerPromise.then(function success(data){
 
-                            // start excution for next listener or return resolve();
+                            // start excution for next listener or return resolve(args);
                             repeater( i + 1, data );
                         }, function failed(err){
 
@@ -41,11 +41,11 @@ Dispatcher.prototype.fire = function(eventName, ...args){
 
             } else {
                 // if no listeners at all
-                resolve();
+                resolve(args);
             }
         } else {
             // if event doesn't exist
-            resolve();
+            resolve(args);
         }
     });
 };

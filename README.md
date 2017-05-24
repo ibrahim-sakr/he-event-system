@@ -18,7 +18,7 @@
 
 add more than listener at once
 all listeners paths must be relative to the root path of the project
-there is an example for listener Module the this folder
+there is an example for listener Module in this folder
 
     Dispatcher.addListeners('EventName', [
         './ListenerModuleOne',

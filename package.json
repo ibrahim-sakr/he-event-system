@@ -1,6 +1,6 @@
 {
   "name": "he-event-system",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "register and fire events with promises returns without EventEmmiter",
   "main": "index.js",
   "scripts": {
