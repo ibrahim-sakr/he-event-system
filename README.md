@@ -8,8 +8,11 @@
 ###quick How to use
 
 `
-var DispatcherCore = require('Dispatcher');
-var Dispatcher     = new DispatcherCore;
+
+    var DispatcherCore = require('Dispatcher');
+
+    var Dispatcher     = new DispatcherCore;
+
 `
 
 
@@ -20,10 +23,15 @@ all listeners paths must be relative to the root path of the project
 there is an example for listener Module the this folder
 
 `
-Dispatcher.addListeners('EventName', [
-    './ListenerModuleOne',
-    './ListenerModuleTwo'
-]);
+
+    Dispatcher.addListeners('EventName', [
+
+        './ListenerModuleOne',
+
+        './ListenerModuleTwo'
+
+    ]);
+
 `
 
 
@@ -68,11 +76,17 @@ the final data returned is the data that all listeners modify it
 the err is the first err accured by any listener
 
 `
-Dispatcher.fire('EventName', 'argOne', 'argTwo', 'argThree').then(function success(data){
-    console.log('success -> ' + data);
-}, function fail(err){
-    console.log('err -> ' + err);
-});
+
+    Dispatcher.fire('EventName', 'argOne', 'argTwo', 'argThree').then(function success(data){
+
+        console.log('success -> ' + data);
+
+    }, function fail(err){
+
+        console.log('err -> ' + err);
+
+    });
+
 `
 
 the main object that contains all events with listeners

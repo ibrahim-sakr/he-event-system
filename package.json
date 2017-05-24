@@ -12,5 +12,11 @@
     "type": "git",
     "url": "git+https://github.com/ibrahimsaqr/he-event-system.git"
   },
-  "homepage": "https://github.com/ibrahimsaqr/he-event-system#readme"
+  "homepage": "https://github.com/ibrahimsaqr/he-event-system#readme",
+  "keywords": [
+    "events",
+    "dispatcher",
+    "listeners",
+    "fire"
+  ]
 }
