@@ -1,7 +1,10 @@
-var Dispatcher = function(){
-    this.events = {
-        // "eventName": [] // array of listeners
-    };
+var Dispatcher = function(EventsLiteners){
+    /**
+     * {
+     *     "eventName": [] // array of listeners
+     * }
+     */
+    this.events = EventsLiteners || {};
 };
 
 /**

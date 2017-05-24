@@ -1,7 +1,7 @@
 {
   "name": "he-event-system",
-  "version": "1.2.0",
-  "description": "registre and fire events with promises returns",
+  "version": "1.2.1",
+  "description": "register and fire events with promises returns without EventEmmiter",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
