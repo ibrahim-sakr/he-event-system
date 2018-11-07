@@ -1,177 +1,161 @@
-var Dispatcher = function(EventsLiteners){
+class Dispatcher {
+
+  constructor(EventsListeners) {
     /**
      * {
      *     "eventName": [] // array of listeners
      * }
      */
-    this.events = EventsLiteners || {};
-};
+    this.events = EventsListeners || {};
+  }
 
-/**
- * fire event and dispatch all it's listeners in Order
- * @param  {String}        eventName [the event name]
- * @param  {Array<String>} args      [array of any arguments that we need to pass to all listeners]
- * @return {Promise}
- */
-Dispatcher.prototype.fire = function(eventName, ...args){
-    var self = this;
-    return new Promise(function(resolve, reject){
-        if (self.events[eventName]) {
-            var listenersLength = self.countListeners(eventName);
-            if (listenersLength > -1) {
+  /**
+   * fire event and dispatch all it's listeners in Order
+   * @param  {String}     eventPath [the event path]
+   * @param  {Array<Any>} args      [array of any arguments that we need to pass to Event Instance]
+   * @return {Promise}
+   */
+  async fire(eventPath, ...args) {
+    const rootPath = '../../';
 
-                // loop for all listeners and excute them
-                function repeater(i, repeaterData) {
-                    if( i < listenersLength ) {
-                        var listenerPromise = self.fireListener(eventName, self.events[eventName][i], args);
-                        listenerPromise.then(function success(data){
+    // create Event Instance
+    /**
+     * @TODO optimize
+     */
+    const event = new (require(rootPath + eventPath))(...args);
 
-                            // start excution for next listener or return resolve(args);
-                            repeater( i + 1, data );
-                        }, function failed(err){
+    // grab listeners
+    const listeners = this.events[eventPath] || [];
 
-                            // stop excution and return reject(err);
-                            reject(err);
-                        });
-                    } else {
-                        resolve(repeaterData);
-                    }
-                }
-                repeater(0);
+    // loop over listeners and run them all
+    for (const listenerPath of listeners) {
+      // create Event Instance
+      const listener = new (require(rootPath + listenerPath))(event);
 
-            } else {
-                // if no listeners at all
-                resolve(args);
-            }
-        } else {
-            // if event doesn't exist
-            resolve(args);
-        }
-    });
-};
-
-/**
- * fire specific listener with it's name
- * @param  {String} eventName    [event name that contain the listener]
- * @param  {String} listenerName [listener name]
- * @param  {Array}  args         [array of any other arguments that we need to pass to listener]
- * @return {Promise}             [promise with resolve or reject function]
- */
-Dispatcher.prototype.fireListener = function(eventName, listenerName, args){
-    var self = this;
-    // create Promise to return
-    return new Promise(function(resolve, reject) {
-
-        // hold listener Object after Requiring 
-        var Events = self.events[eventName],
-
-        // require the listener
-        listener = require('../../../' + Events[ Events.indexOf(listenerName) ]);
-
-        // next, stop, array of args
-        listener.handle(function next(data){
-            resolve(data);
-        }, function stop(err){
-            reject(err);
-        }, args);
-    });
-};
-
-/**
- * add array of listeners to event
- * @param  {String}        eventName     [the name of the event]
- * @param  {Array<String>} eventHandlers [array of strings represent the listeners that we need to add]
- * @return {Boolean}                     [false if the eventHandlers is NOT array]
- */
-Dispatcher.prototype.addListeners = function(eventName, eventHandlers){
-    if (Array.isArray(eventHandlers)) {
-        for (var i = 0; i < eventHandlers.length; i++) {
-            this.addListener(eventName, eventHandlers[i]);
-        }
-        return true;
-    } else {
-        return false;
+      try {
+        await this.runListener(event, listener);
+      } catch (e) {
+        throw e;
+      }
     }
-};
 
-/**
- * add new listener to event OR create new event with this listener
- * @param  {String} eventName    [the name of the event]
- * @param  {String} eventHandler [the name of the listener]
- * @return {Boolean}             [always true]
- */
-Dispatcher.prototype.addListener = function(eventName, eventHandler){
-    if (this.events[eventName]) {
-        this.events[eventName].push(eventHandler);
-    } else {
-        this.events[eventName] = [eventHandler];
+    return event;
+  }
+
+  /**
+   * fire specific listener with it's Instance
+   * @param  {Object} event    [Event Instance]
+   * @param  {Object} listener [Listener Instance]
+   * @return {Promise}
+   */
+  runListener(event, listener) {
+    return listener.handler(event);
+  }
+
+  /**
+   * add array of listeners to event
+   * @param  {String}        event     [path of the event class]
+   * @param  {Array<String>} listeners [array of paths of the listeners classes]
+   * @return {Void}
+   */
+  addListeners(event, listeners) {
+    if (!Array.isArray(listeners)) {
+      throw Error('listeners must be array of listeners instances');
     }
-    return true;
-};
 
-/**
- * delete specific listener for specific Event
- * @param  {String} eventName    [the event name]
- * @param  {String} eventHandler [the listener name]
- * @return {Boolean}             [false if event OR listener doesn't exist]
- */
-Dispatcher.prototype.removeListener = function(eventName, eventHandler){
-    // check if event exist
-    if(this.events[eventName]) {
-        // get the index of the handler
-        var index = this.events[eventName].indexOf(eventHandler);
-
-        // if the handler exist
-        if (index > -1) {
-            // remove the handler
-            // var removedItem = this.events[eventName].splice(index, 1);
-
-            return this.events[eventName].splice(index, 1)[0];
-        } else {
-            return false;
-        };
-    } else {
-        return false;
+    for (let i = 0; i < listeners.length; i++) {
+      this.addListener(event, listeners[i]);
     }
-};
+  }
 
-/**
- * empty event array
- * @param  {String} eventName [the event name that we need to clear all it's listeners]
- * @return {Boolean}          [false if event doesn't exist]
- */
-Dispatcher.prototype.removeAllListeners = function(eventName){
-    if(this.events[eventName]) {
-        this.events[eventName] = [];
-        return true;
+  /**
+   * add new listener to event OR create new event with this listener
+   * @param  {String} event    [path of the event class]
+   * @param  {String} listener [path of the listener class]
+   * @return {Void}
+   */
+  addListener(event, listener) {
+    if (this.events[event]) {
+      this.events[event].push(listener);
     } else {
-        return false;
-    };
-};
+      this.events[event] = [listener];
+    }
+  }
 
-/**
- * Alias for removeAlllisteners
- */
-Dispatcher.prototype.stop = function(eventName){
-    return this.removeAllListeners(eventName);
-};
+  /**
+   * empty event array
+   * @param  {String} event  [path of the event class]
+   * @return {Array<String>} [paths of the removed listeners]
+   */
+  removeListeners(event) {
+    if (!this.events[event]) {
+      throw Error(`Event ${event.split('/').pop()} doesn't found`);
+    }
 
-/**
- * grab all listeners list for specific Event
- * @param  {String}               eventName [the event name that we need to grab it's listeners]
- * @return {Arry<String>|Boolean}           [Array when the event exist (may be empty array) OR False if the event doesn't exist]
- */
-Dispatcher.prototype.getListeners = function(eventName){
-    return (this.events[eventName]) ? this.events[eventName] : false;
-};
+    const listeners = this.events[event];
 
-/**
- * get the Number of listeners for specific Event
- * @param  {String} eventName [the event name that we need to count it's listeners]
- * @return {Number}           [if the event exist (may be 0 if no listeners at all) AND -1 if Event doesn't exist]
- */
-Dispatcher.prototype.countListeners = function(eventName){
-    return (this.events[eventName]) ? this.events[eventName].length : -1;
-};
+    this.events[event] = [];
+
+    return listeners;
+  }
+
+  /**
+   * delete specific listener for specific Event
+   * @param  {String} event    [the event path]
+   * @param  {String} listener [the listener path]
+   * @return {String}          [the removed lister path]
+   */
+  removeListener(event, listener) {
+    // check if event NOT exist
+    if (!this.events[event]) {
+      throw Error(`Event "${event.split('/').pop()}" Not Found`);
+    }
+
+    // get the index of the handler
+    const index = this.events[event].indexOf(listener);
+
+    // if the handler Does not exist
+    if (index === -1) {
+      throw Error(`Listener "${listener.split('/').pop()}" Not Found in Event ${event.split('/').pop()}`);
+    }
+
+    // remove the handler and return it
+    return this.events[event].splice(index, 1)[0];
+  }
+
+  /**
+   * Alias for removeAllListeners
+   */
+  stop(event) {
+    return this.removeListeners(event);
+  }
+
+  /**
+   * grab all listeners list for specific Event
+   * @param  {String}        event [the event path]
+   * @return {Array<Object>}       [Array of listeners paths]
+   */
+  getListeners(event) {
+    if (!this.events[event]) {
+      throw Error(`Event ${event.split('/').pop()} not found`);
+    }
+
+    return this.events[event];
+  }
+
+  /**
+   * get the Number of listeners for specific Event
+   * @param  {String} event [the event path]
+   * @return {Number}       [number of listeners]
+   */
+  countListeners(event) {
+    if (!this.events[event]) {
+      throw Error(`Event ${event.split('/').pop()} not found`);
+    }
+
+    return this.events[event].length;
+  }
+
+}
 
 exports = module.exports = Dispatcher;
