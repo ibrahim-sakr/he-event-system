@@ -16,7 +16,7 @@ class Dispatcher {
    * @return {Promise}
    */
   async fire(eventPath, ...args) {
-    const rootPath = '../../';
+    const rootPath = '../../../';
 
     // create Event Instance
     /**
